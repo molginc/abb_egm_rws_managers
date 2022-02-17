@@ -48,7 +48,6 @@ namespace abb
 {
 namespace robot
 {
-
 /**
  * \brief Manager for handling Externally Guided Motion (EGM) communication with an ABB robot controller.
  */
@@ -67,10 +66,9 @@ public:
      * \param mech_unit_group assumed to be connected to the EGM channel.
      */
     ChannelConfiguration(const unsigned short port_number, const MechanicalUnitGroup& mech_unit_group)
-    :
-    port_number{port_number},
-    mech_unit_group{mech_unit_group}
-    {}
+      : port_number{ port_number }, mech_unit_group{ mech_unit_group }
+    {
+    }
 
     /**
      * \brief Port number used by the EGM channel.
@@ -136,8 +134,7 @@ private:
      *
      * \throw std::runtime_error if failed to create an EGM interface for the channel.
      */
-    Channel(const ChannelConfiguration& configuration,
-            boost::asio::io_service& io_service,
+    Channel(const ChannelConfiguration& configuration, boost::asio::io_service& io_service,
             boost::shared_ptr<boost::condition_variable> p_new_message_cv);
 
     /**
@@ -300,7 +297,7 @@ private:
   boost::shared_ptr<boost::condition_variable> p_new_message_cv_;
 };
 
-}
-}
+}  // namespace robot
+}  // namespace abb
 
 #endif
