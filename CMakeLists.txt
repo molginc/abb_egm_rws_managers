@@ -43,6 +43,26 @@ find_package(abb_librws REQUIRED)
 find_package(Threads REQUIRED)
 
 #-----------------------------
+# ROSCPP (to enable logging in ros environment)
+#-----------------------------
+find_package(catkin REQUIRED
+  COMPONENTS
+    roscpp
+    
+)
+
+catkin_package(
+  INCLUDE_DIRS
+    include
+  LIBRARIES
+    ${PROJECT_NAME}
+  CATKIN_DEPENDS    
+    roscpp
+    
+)
+
+
+#-----------------------------
 # Google protocol buffers
 #-----------------------------
 # Temporary workaround for https://github.com/ms-iot/ROSOnWindows/issues/218.
@@ -125,6 +145,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>"
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
   "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
+  "${catkin_INCLUDE_DIRS}"
 )
 
 target_link_libraries(${PROJECT_NAME} PUBLIC

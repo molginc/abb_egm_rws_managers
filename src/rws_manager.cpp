@@ -38,6 +38,8 @@
 
 #include "abb_egm_rws_managers/rws_manager.h"
 #include "abb_egm_rws_managers/system_data_parser.h"
+#include <ros/ros.h>
+#include <ros/console.h>
 
 namespace abb
 {
@@ -85,7 +87,12 @@ RobotControllerDescription RWSManager::collectAndParseSystemData(const std::stri
     //------------------------
     // General system info
     //------------------------
+    ROS_WARN("collectAndParseSystemData"); 
+    //ROS_WARN( typeid(system_data_.system).name());
+
     system_data_.system = interface_.getSystemInfo();
+    
+
 
     if (system_data_.system.robot_ware_version.empty() || system_data_.system.system_name.empty() ||
         system_data_.system.system_type.empty() || system_data_.system.system_options.empty())

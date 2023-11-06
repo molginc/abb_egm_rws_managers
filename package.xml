@@ -12,12 +12,15 @@
   <author>Jon Tjerngren</author>
 
   <buildtool_depend>cmake</buildtool_depend>
-
+  
   <depend>abb_libegm</depend>
   <depend>abb_librws</depend>
 
   <build_depend>protobuf-dev</build_depend>
   <build_export_depend>protobuf-dev</build_export_depend>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <depend>roscpp</depend>
 
   <exec_depend>protobuf</exec_depend>
 
