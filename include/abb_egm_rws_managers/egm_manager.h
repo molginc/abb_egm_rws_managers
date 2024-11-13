@@ -103,13 +103,14 @@ public:
   bool waitForMessage(const unsigned int timeout_ms);
 
   /**
-   * \brief Reads states from all configured EGM channels.
+   * \brief Reads states from all configured EGM channels and returns feedback object from Input.
    *
    * \param motion_data for storing the states.
    *
    * \return true if any new states were read.
+   * \return abb::egm::wrapper::Feedback containing the feedback data.
    */
-  bool read(MotionData& motion_data);
+  std::pair<bool,abb::egm::wrapper::Feedback> read(MotionData& motion_data);
 
   /**
    * \brief Writes commands to all configured EGM channels.
@@ -138,13 +139,14 @@ private:
             boost::shared_ptr<boost::condition_variable> p_new_message_cv);
 
     /**
-     * \brief Reads states from the channel.
+     * \brief Reads states from the channel amd returns Feedback data.
      *
      * \param group for storing the states.
      *
      * \return true if any new states were read.
+     * \return abb::egm::wrapper::Feedback& containing the feedback data.
      */
-    bool read(MotionData::MechanicalUnitGroup& group);
+    std::pair<bool,abb::egm::wrapper::Feedback> read(MotionData::MechanicalUnitGroup& group);
 
     /**
      * \brief Writes commands to the channel.

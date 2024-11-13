@@ -101,9 +101,19 @@ missed_messages_{MISSED_MESSAGES_THRESHOLD}
   }
 }
 
-bool EGMManager::Channel::read(MotionData::MechanicalUnitGroup& group)
+// Added by Dyllian Powell November 2024 - Read and return EGM feedback for joints and motion to broadcast elsewhere
+// Had to add this member function into egm_manager.h as well. Not sure I actually need the unit group at all tbh
+// const abb::egm::wrapper::Feedback& EGMManager::Channel::readEGMFeedback()
+// {
+//   // once we enter here, the &input reference has already been read and verified. Just need to access and publish info
+//   auto feedback = input_.feedback();
+//   return feedback;
+// }
+
+std::pair<bool,abb::egm::wrapper::Feedback> EGMManager::Channel::read(MotionData::MechanicalUnitGroup& group)
 {
   bool any_new_states{false};
+  abb::egm::wrapper::Feedback feedback;
 
   p_interface_->read(&input_);
 
@@ -145,12 +155,16 @@ bool EGMManager::Channel::read(MotionData::MechanicalUnitGroup& group)
     {
       any_new_states = true;
     }
+
+    // always publish feedback if available - Dyllian Powell
+    // readEGMFeedback();
+    feedback = input_.feedback();
   }
 
   previous_header_.CopyFrom(input_.header());
   previous_status_.CopyFrom(input_.status());
 
-  return any_new_states;
+  return std::make_pair(any_new_states, feedback);
 }
 
 void EGMManager::Channel::write(const MotionData::MechanicalUnitGroup& group)
@@ -432,17 +446,18 @@ bool EGMManager::waitForMessage(const unsigned int timeout_ms)
   }
 }
 
-bool EGMManager::read(MotionData& motion_data)
+std::pair<bool,abb::egm::wrapper::Feedback> EGMManager::read(MotionData& motion_data)
 {
   bool any_new_states{false};
-
+  abb::egm::wrapper::Feedback feedback;
   for(auto& channel : channels_)
   {
     for(auto& motion_group : motion_data.groups)
     {
       if(motion_group.name == channel.getMechanicalUnitGroupName())
       {
-        if(channel.read(motion_group))
+        auto [new_states, feedback] = channel.read(motion_group);
+        if(new_states)
         {
           any_new_states = true;
         }
@@ -450,7 +465,8 @@ bool EGMManager::read(MotionData& motion_data)
     }
   }
 
-  return any_new_states;
+  // return any_new_states;
+  return std::make_pair(any_new_states, feedback);
 }
 
 void EGMManager::write(const MotionData& motion_data)
