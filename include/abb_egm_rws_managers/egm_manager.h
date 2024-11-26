@@ -202,6 +202,13 @@ private:
     bool updateExternalJointStates(MotionData::MechanicalUnitGroup& group);
 
     /**
+     * \brief updates the TCP robot pose states.
+     * \return true if any new pose states were read.
+     * \throw std::runtime_error if there is a mismatch between number of assumed active robot pose and feedback.
+     */
+    bool updateTCPRobotPoseStates(MotionData::MechanicalUnitGroup& group);
+
+    /**
      * \brief Prepares output commands.
      */
     void prepareOutputs();
@@ -219,6 +226,11 @@ private:
      * \param group containing the joint commands.
      */
     void updateExternalJointCommands(const MotionData::MechanicalUnitGroup& group);
+
+    /**
+     * \brief Updates the TCP Robot pose commands.
+     */
+    void updateTCPRobotPoseCommands(const MotionData::MechanicalUnitGroup& group);
 
     /**
      * \brief Validates a joint command.

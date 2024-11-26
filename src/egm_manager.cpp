@@ -145,6 +145,11 @@ bool EGMManager::Channel::read(MotionData::MechanicalUnitGroup& group)
     {
       any_new_states = true;
     }
+
+    if(updateTCPRobotPoseStates(group))
+    {
+      any_new_states = true;
+    }
   }
 
   previous_header_.CopyFrom(input_.header());
@@ -161,6 +166,7 @@ void EGMManager::Channel::write(const MotionData::MechanicalUnitGroup& group)
     prepareOutputs();
     updateTCPRobotJointCommands(group);
     updateExternalJointCommands(group);
+    updateTCPRobotPoseCommands(group);
     p_interface_->write(output_);
   }
 }
@@ -276,6 +282,29 @@ bool EGMManager::Channel::updateExternalJointStates(MotionData::MechanicalUnitGr
   return true;
 }
 
+bool EGMManager::Channel::updateTCPRobotPoseStates(MotionData::MechanicalUnitGroup& group)
+{
+  const auto& position{input_.feedback().robot().cartesian().pose().position()};
+  const auto& orientation{input_.feedback().robot().cartesian().pose().quaternion()};
+
+  for(auto& unit : group.units)
+  {
+    if(unit.active && unit.type == MechanicalUnit_Type_TCP_ROBOT)
+    {
+      unit.pose.state.position.position.x = position.x();
+      unit.pose.state.position.position.y = position.y();
+      unit.pose.state.position.position.z = position.z();
+
+      unit.pose.state.position.orientation.w = orientation.u0();
+      unit.pose.state.position.orientation.x = orientation.u1();
+      unit.pose.state.position.orientation.y = orientation.u2();
+      unit.pose.state.position.orientation.z = orientation.u3();
+    }
+  }
+
+  return true;
+}
+
 void EGMManager::Channel::prepareOutputs()
 {
   output_.mutable_robot()->CopyFrom(input_.feedback().robot());
@@ -340,7 +369,7 @@ void EGMManager::Channel::updateExternalJointCommands(const MotionData::Mechanic
 {
   auto p_positions{output_.mutable_external()->mutable_joints()->mutable_position()};
   auto p_velocities{output_.mutable_external()->mutable_joints()->mutable_velocity()};
-
+  // output_.mutable_robot()->mutable_cartesian()->mutable_pose()
   int counter{0};
 
   for(auto& unit : group.units)
@@ -388,6 +417,35 @@ void EGMManager::Channel::validateJointCommand(const MotionData::Joint& joint)
   }
 }
 
+/****
+ * Cartesian Pose command resources
+ */
+void EGMManager::Channel::updateTCPRobotPoseCommands(const MotionData::MechanicalUnitGroup& group)
+{
+  auto p_position{output_.mutable_robot()->mutable_cartesian()->mutable_pose()->mutable_position()};
+  auto p_orientation{output_.mutable_robot()->mutable_cartesian()->mutable_pose()->mutable_quaternion()};
+  // idk if we will use this lol 
+  auto p_euler{output_.mutable_robot()->mutable_cartesian()->mutable_pose()->mutable_euler()};
+
+  for(auto& unit : group.units)
+  {
+    if(unit.active && unit.type == MechanicalUnit_Type_TCP_ROBOT)
+    {
+
+      // The validation throws an exception if any of the values are erroneous.
+      // validatePoseCommand(pose);
+      p_position->set_x(unit.pose.command.position.position.x);
+      p_position->set_y(unit.pose.command.position.position.y);
+      p_position->set_z(unit.pose.command.position.position.z);
+
+      p_orientation->set_u0(unit.pose.command.position.orientation.w);
+      p_orientation->set_u1(unit.pose.command.position.orientation.x);
+      p_orientation->set_u2(unit.pose.command.position.orientation.y);
+      p_orientation->set_u3(unit.pose.command.position.orientation.z);
+      
+    }
+  }
+}
 /***********************************************************************************************************************
  * Class definitions: EGMManager
  */
