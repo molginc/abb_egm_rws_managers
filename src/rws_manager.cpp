@@ -224,6 +224,7 @@ void RWSManager::collectAndUpdateRuntimeData(SystemStateData& system_state_data,
       //   throw std::runtime_error{"Robot info missing"};
       // }
       joint_target = interface_.getMechanicalUnitJointTarget(group.robot().name());
+      rob_target = interface_.getMechanicalUnitRobTarget(group.robot().name(), abb::rws::Coordinate::ACTIVE, "tool0", "wobj0");
       // if(!interface_.getMechanicalUnitJointTarget(group.robot().name(), &joint_target))
       // {
       //   throw std::runtime_error{"Robot joint info missing"};
@@ -244,6 +245,7 @@ void RWSManager::collectAndUpdateRuntimeData(SystemStateData& system_state_data,
       pair.first = group.robot().name();
       pair.second.active = dynamic_info.mode == rws::MechanicalUnitMode::ACTIVATED;
       pair.second.joint_target = joint_target;
+      pair.second.rob_target = rob_target;
       system_state_data.mechanical_units.insert(pair);
     }
 
@@ -310,7 +312,15 @@ void RWSManager::collectAndUpdateRuntimeData(SystemStateData& system_state_data,
         unit.pose.state.position.orientation.x = it->second.rob_target.orient.q2.value;
         unit.pose.state.position.orientation.y = it->second.rob_target.orient.q3.value;
         unit.pose.state.position.orientation.z = it->second.rob_target.orient.q4.value;
-        
+        // ROS_WARN("Updated RobTarget");
+        // ROS_INFO_STREAM("RobTarget: "
+        //     << "Position: [" << it->second.rob_target.pos.x.value << ", "
+        //     << it->second.rob_target.pos.y.value << ", "
+        //     << it->second.rob_target.pos.z.value << "], "
+        //     << "Orientation: [" << it->second.rob_target.orient.q1.value << ", "
+        //     << it->second.rob_target.orient.q2.value << ", "
+        //     << it->second.rob_target.orient.q3.value << ", "
+        //     << it->second.rob_target.orient.q4.value << "]");
         for (size_t i{ 0 }; i < unit.joints.size(); ++i)
         {
           auto& joint{ unit.joints[i] };
