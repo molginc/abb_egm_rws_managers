@@ -193,6 +193,10 @@ struct SystemStateData
      */
     rws::JointTarget joint_target;
 
+    /**
+     * \brief The unit's current rob target.
+     */
+    rws::RobTarget rob_target;
   };
 
   /**

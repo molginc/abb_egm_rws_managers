@@ -211,6 +211,7 @@ void RWSManager::collectAndUpdateRuntimeData(SystemStateData& system_state_data,
   rws::MechanicalUnitStaticInfo static_info{};
   rws::MechanicalUnitDynamicInfo dynamic_info{};
   rws::JointTarget joint_target{};
+  rws::RobTarget rob_target{};
 
   for (const auto& group : description_.mechanical_units_groups())
   {
@@ -253,6 +254,7 @@ void RWSManager::collectAndUpdateRuntimeData(SystemStateData& system_state_data,
         static_info = interface_.getMechanicalUnitStaticInfo(unit.name());
         dynamic_info = interface_.getMechanicalUnitDynamicInfo(unit.name());
         joint_target = interface_.getMechanicalUnitJointTarget(unit.name());
+        rob_target = interface_.getMechanicalUnitRobTarget(unit.name(), abb::rws::Coordinate::ACTIVE, "tool0", "wobj0");
         // if (!interface_.getMechanicalUnitStaticInfo(unit.name(), static_info) ||
         //     !interface_.getMechanicalUnitDynamicInfo(unit.name(), dynamic_info))
         // {
@@ -271,6 +273,7 @@ void RWSManager::collectAndUpdateRuntimeData(SystemStateData& system_state_data,
         pair.first = unit.name();
         pair.second.active = dynamic_info.mode == rws::MechanicalUnitMode::ACTIVATED;
         pair.second.joint_target = joint_target;
+        pair.second.rob_target = rob_target;
         system_state_data.mechanical_units.insert(pair);
       }
     }
@@ -299,6 +302,15 @@ void RWSManager::collectAndUpdateRuntimeData(SystemStateData& system_state_data,
       {
         unit.active = it->second.active;
 
+        // Map RAPID robTarget to pose state 
+        unit.pose.state.position.position.x = it->second.rob_target.pos.x.value;
+        unit.pose.state.position.position.y = it->second.rob_target.pos.y.value;
+        unit.pose.state.position.position.z = it->second.rob_target.pos.z.value;
+        unit.pose.state.position.orientation.w = it->second.rob_target.orient.q1.value;
+        unit.pose.state.position.orientation.x = it->second.rob_target.orient.q2.value;
+        unit.pose.state.position.orientation.y = it->second.rob_target.orient.q3.value;
+        unit.pose.state.position.orientation.z = it->second.rob_target.orient.q4.value;
+        
         for (size_t i{ 0 }; i < unit.joints.size(); ++i)
         {
           auto& joint{ unit.joints[i] };
