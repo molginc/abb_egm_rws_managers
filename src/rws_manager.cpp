@@ -312,15 +312,7 @@ void RWSManager::collectAndUpdateRuntimeData(SystemStateData& system_state_data,
         unit.pose.state.position.orientation.x = it->second.rob_target.orient.q2.value;
         unit.pose.state.position.orientation.y = it->second.rob_target.orient.q3.value;
         unit.pose.state.position.orientation.z = it->second.rob_target.orient.q4.value;
-        // ROS_WARN("Updated RobTarget");
-        // ROS_INFO_STREAM("RobTarget: "
-        //     << "Position: [" << it->second.rob_target.pos.x.value << ", "
-        //     << it->second.rob_target.pos.y.value << ", "
-        //     << it->second.rob_target.pos.z.value << "], "
-        //     << "Orientation: [" << it->second.rob_target.orient.q1.value << ", "
-        //     << it->second.rob_target.orient.q2.value << ", "
-        //     << it->second.rob_target.orient.q3.value << ", "
-        //     << it->second.rob_target.orient.q4.value << "]");
+
         for (size_t i{ 0 }; i < unit.joints.size(); ++i)
         {
           auto& joint{ unit.joints[i] };
