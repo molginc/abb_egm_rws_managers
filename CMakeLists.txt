@@ -7,6 +7,8 @@ set(CMAKE_CXX_STANDARD 17)
 # Read the package manifest.
 file(READ "${CMAKE_CURRENT_SOURCE_DIR}/package.xml" package_xml_str)
 
+set(Protobuf_PROTOC_EXECUTABLE "/usr/bin/protoc")
+
 # Extract project name.
 if(NOT package_xml_str MATCHES "<name>([A-Za-z0-9_]+)</name>")
   message(FATAL_ERROR "Could not parse project name from package manifest (aborting)")
