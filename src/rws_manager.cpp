@@ -425,16 +425,21 @@ bool RWSManager::isInterfaceReady()
   return false;
 }
 
+// Use a scoped lock so interface_mutex_ is released even if service() throws.
+// Previously an exception (e.g. an RWS keep-alive connect timeout) skipped the
+// unlock(), leaving the mutex held forever: isInterfaceReady() then always
+// returned false and every RWS service replied "Server is busy" (1001) until
+// the node was restarted.
 bool RWSManager::runService(ServiceFunctor const& service)
 {
-  if (interface_mutex_.try_lock())
+  std::unique_lock<std::mutex> lock{ interface_mutex_, std::try_to_lock };
+  if (!lock.owns_lock())
   {
-    service(interface_);
-    interface_mutex_.unlock();
-    return true;
+    return false;
   }
 
-  return false;
+  service(interface_);  // lock is released on return or if this throws
+  return true;
 }
 
 /***********************************************************
